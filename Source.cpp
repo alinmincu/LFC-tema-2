@@ -1,41 +1,4 @@
-﻿//#include "lexer.h"
-//#include "parser.h"
-//#include "SemanticAnalyzer.h"
-//#include <fstream>
-//#include <sstream>
-//
-//int main() {
-//    std::ifstream inputFile("in.txt");
-//    if (!inputFile.is_open()) {
-//        std::cerr << "Could not open file!" << std::endl;
-//        return 1;
-//    }
-//
-//    std::string code((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
-//    inputFile.close();
-//
-//    // Lexer
-//    Lexer lexer(code);
-//    lexer.tokenize();
-//    lexer.printTokens();
-//    lexer.printGlobalVariables();
-//
-//    // Parser
-//    Parser parser(lexer.getTokens());
-//    parser.parse();
-//    parser.printErrors();
-//
-//    // Semantic Analyzer
-//    SemanticAnalyzer semanticAnalyzer(lexer.getGlobalVariables(), lexer.getFunctions());
-//    semanticAnalyzer.analyze();
-//    semanticAnalyzer.printErrors();
-//
-//    lexer.printFunctions();
-//
-//    return 0;
-//}
-
-#include <fstream>
+﻿#include <fstream>
 #include <string>
 #include <unordered_set>
 #include <regex>
@@ -43,7 +6,6 @@
 #include <sstream>
 #include <vector>
 
-// Struct pentru variabile și funcții
 struct Variable {
     std::string type;
     std::string name;
@@ -65,7 +27,6 @@ std::string removeInvalidDeclarations(const std::string& code, const std::unorde
     std::string line;
 
     while (std::getline(stream, line)) {
-        // Adaugă liniile care NU sunt în lista invalidă
         if (invalidLines.find(line) == invalidLines.end()) {
             result += line + "\n";
         }
@@ -73,7 +34,6 @@ std::string removeInvalidDeclarations(const std::string& code, const std::unorde
     return result;
 }
 
-// Verifică dacă inițializarea este validă
 bool isInitializationValid(const std::string& type, const std::string& value) {
     if (type == "string") {
         return value.front() == '"' && value.back() == '"';
@@ -84,7 +44,6 @@ bool isInitializationValid(const std::string& type, const std::string& value) {
     return false;
 }
 
-// Elimină comentariile
 std::string removeComments(const std::string& code) {
     std::string cleanedCode = code;
     std::regex singleLineCommentRegex(R"(//.*?$)");
@@ -96,26 +55,46 @@ std::string removeComments(const std::string& code) {
     return cleanedCode;
 }
 
-// Analizează tokenurile
+std::string getTokenType(const std::string& token) {
+    static const std::unordered_set<std::string> keywords = {
+        "int", "float", "string", "void", "if", "else", "for", "while", "return"
+    };
+
+    if (token == "#") return "DIRECTIVE_SYMBOL";
+    if (keywords.find(token) != keywords.end()) return "KEYWORD";
+    if (token == "include") return "DIRECTIVE";
+    if (token == "iostream") return "HEADER";
+    if (token == "std") return "NAMESPACE";
+    if (token == "cout" || token == "endl") return "STREAM";
+    if (std::regex_match(token, std::regex(R"([{}();,])"))) return "DELIMITER";
+    if (std::regex_match(token, std::regex(R"([-+*/=<>!&|])"))) return "OPERATOR";
+    if (std::regex_match(token, std::regex(R"(\d+\.\d+|\d+)"))) return "NUMBER";
+    if (std::regex_match(token, std::regex(R"(".*?")"))) return "STRING";
+    if (std::regex_match(token, std::regex(R"([a-zA-Z_][a-zA-Z0-9_]*)"))) return "VARIABLE";
+
+    return "UNKNOWN";
+}
+
 void analyzeTokens(const std::string& code, std::ofstream& outputFile) {
-    std::regex tokenRegex(R"((int|float|string|void|if|else|for|while|return|[a-zA-Z_][a-zA-Z0-9_]*|[-+*/=<>!&|;{}(),]|\d+|".*?"))");
+    std::regex tokenRegex(R"((#|include|int|float|string|void|if|else|for|while|return|[a-zA-Z_][a-zA-Z0-9_]*|[-+*/=<>!&|+=-=*=/=;{}(),]|\d+\.\d+|\d+|".*?"))");
     std::smatch match;
     std::istringstream stream(code);
     std::string line;
     int lineNumber = 0;
 
-    outputFile << "Lexical Units:\n";
+    outputFile << "\nLexical Units:\n";
     while (std::getline(stream, line)) {
         ++lineNumber;
         auto searchStart = line.cbegin();
         while (std::regex_search(searchStart, line.cend(), match, tokenRegex)) {
-            outputFile << "(" << "TOKEN" << ", " << match.str() << ", line " << lineNumber << ")\n";
+            std::string token = match.str();
+            std::string tokenType = getTokenType(token);
+            outputFile << "(" << tokenType << ", " << token << ", line " << lineNumber << ")\n";
             searchStart = match.suffix().first;
         }
     }
 }
 
-// Analizează variabilele globale
 void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& globalVariables, std::ofstream& outputFile) {
     std::regex globalVarRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^;]+);)");
     std::smatch match;
@@ -124,7 +103,6 @@ void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& glob
     bool insideFunction = false;
 
     while (std::getline(stream, line)) {
-        // Verificăm dacă suntem într-o funcție
         if (std::regex_search(line, std::regex(R"((int|float|string|void)\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\()"))) {
             insideFunction = true;
         }
@@ -137,25 +115,24 @@ void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& glob
         }
     }
 
-    outputFile << "\nGlobal Variables:\n";
+    outputFile << "Global Variables:\n";
     for (const auto& var : globalVariables) {
         outputFile << var.type << " " << var.name << " = " << var.value << "\n";
     }
 }
 
-// Analizează funcțiile
 void analyzeFunctions(const std::string& code, std::vector<Function>& functions, std::ofstream& outputFile) {
     std::regex functionRegex("(int|float|string|void)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)\\s*\\{");
     std::smatch match;
     std::string::const_iterator searchStart(code.cbegin());
 
+    outputFile << "\nFunctions:\n";
+
     while (std::regex_search(searchStart, code.cend(), match, functionRegex)) {
         Function func;
         func.returnType = match[1];
         func.name = match[2];
-        func.line = 0;
 
-        // Extrage parametrii funcției
         std::string params = match[3];
         std::istringstream paramStream(params);
         std::string param;
@@ -166,20 +143,33 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 func.parameters.push_back({ paramMatch[1], paramMatch[2], "", 0 });
             }
         }
-        functions.push_back(func);
-        searchStart = match.suffix().first;
-    }
 
-    outputFile << "\nFunctions:\n";
-    for (const auto& func : functions) {
+        std::string functionBody = match.suffix().str();
+        std::string functionStart = match[0].str();
+
+        bool isRecursive = functionBody.find(func.name + "(") != std::string::npos;
+        bool isIterative = functionBody.find("for") != std::string::npos || functionBody.find("while") != std::string::npos;
+
+        functions.push_back(func);
+
         outputFile << func.returnType << " " << func.name << "(";
         for (size_t i = 0; i < func.parameters.size(); ++i) {
             outputFile << func.parameters[i].type << " " << func.parameters[i].name;
             if (i < func.parameters.size() - 1) outputFile << ", ";
         }
-        outputFile << ")\n";
+        outputFile << ") is ";
+        if (isRecursive) {
+            outputFile << "recursive\n";
+        }
+        else if (isIterative) {
+            outputFile << "iterative\n";
+        }
+        else {
+            outputFile << "neither iterative nor recursive\n";
+        }
+
+        searchStart = match.suffix().first;
     }
-    outputFile << "\n";
 }
 
 int main() {
@@ -211,16 +201,12 @@ int main() {
 
     std::string cleanedCode = removeComments(code);
 
-    // Analizează variabilele globale
     analyzeGlobalVariables(cleanedCode, globalVariables, outputFile);
 
-    // Analizează funcțiile
     analyzeFunctions(cleanedCode, functions, outputFile);
 
-    // Analizează tokenurile
     analyzeTokens(cleanedCode, outputFile);
 
-    // Detectează erori și generează cod curățat
     std::regex varDeclarationRegex("(int|float|string)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^;]+);");
     std::smatch match;
     std::string::const_iterator searchStart(cleanedCode.cbegin());
