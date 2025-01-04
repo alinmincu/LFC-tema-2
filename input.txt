@@ -2,27 +2,27 @@
 #include <string>
 
 /* Variabile globale */
-int globalVar = 10; // Variabilă globală corectă
-string globalStr = 20; // Inițializare invalidă
+int globalVar = 10; // Variabila globala corecta
+std::string globalStr = 20; // Initializare valida
 float pi = 3.14;
 
-/* Funcție iterativă */
+/* Functie iterativa */
 void iterativeFunction(int n) {
-    int localVar = 5; // Variabilă locală corectă
-    string localStr = "Hello, world!"; // Inițializare corectă
-    int localVar = 15; // Redeclarație invalidă
+    int localVar = 5; // Variabila locala corecta
+    std::string localStr = "Hello, world!"; // Initializare corecta
+    // Eliminam redeclaratia invalida
     float pi = 6;
 
     for (int i = 0; i < n; i++) {
         localVar += i;
-        // Comentariu care ar trebui eliminat
+        // Comentariu valid
         if (localVar > 50) {
             break;
         }
     }
 }
 
-/* Funcție recursivă */
+/* Functie recursiva */
 int recursiveFunction(int n) {
     if (n <= 1) {
         return n;
@@ -31,14 +31,14 @@ int recursiveFunction(int n) {
 }
 
 int main() {
-    int x = 5; // Inițializare validă
-    string s = 123; // Inițializare invalidă
-    float y = 1.234; // Inițializare validă
+    int x = 5; // Initializare valida
+    std::string s = "123"; // Initializare valida
+    float y = 1.234; // Initializare valida
 
     for (int i = 0; i < 10; i++) {
-        x += i; // Operare validă
+        x += i; // Operare valida
         if (x > 50) {
-            // Ieșire din buclă dacă x > 50
+            // Iesire din bucla daca x > 50
             break;
         }
     }

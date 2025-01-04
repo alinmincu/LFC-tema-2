@@ -1,57 +1,191 @@
-Error: Invalid initialization for variable globalVar with value aab.
-Error: Invalid initialization for variable globalStr with value 20.
-Error: Variable localVar is already declared.
-Error: Variable pi is already declared.
-Error: Invalid initialization for variable s with value 123.
-Error: Variable i is already declared.
 
-Cleaned Code:
-﻿#include <iostream>
-#include <string>
+Global Variables:
+int globalVar = 10
+string globalStr = 20
+float pi = 3.14
 
+Functions:
+void iterativeFunction(int n)
+int recursiveFunction(int n)
+int main()
 
-int globalVar = aab; 
-string globalStr = 20; 
-float pi = 3.14;
-
-
-void iterativeFunction(int n) {
-    int localVar = 5; 
-    string localStr = "Hello, world!"; 
-    int localVar = 15; 
-    float pi = 6;
-
-    for (int i = 0; i < n; i++) {
-        localVar += i;
-        
-        if (localVar > 50) {
-            break;
-        }
-    }
-}
-
-
-int recursiveFunction(int n) {
-    if (n <= 1) {
-        return n;
-    }
-    return n + recursiveFunction(n - 1); 
-}
-
-int main() {
-    int x = 5; 
-    string s = 123; 
-    float y = 1.234; 
-
-    for (int i = 0; i < 10; i++) {
-        x += i; 
-        if (x > 50) {
-            
-            break;
-        }
-    }
-
-    std::cout << "Program completat." << std::endl;
-    return 0;
-}
-
+Lexical Units:
+(TOKEN, include, line 1)
+(TOKEN, <, line 1)
+(TOKEN, iostream, line 1)
+(TOKEN, >, line 1)
+(TOKEN, include, line 2)
+(TOKEN, <, line 2)
+(TOKEN, string, line 2)
+(TOKEN, >, line 2)
+(TOKEN, int, line 5)
+(TOKEN, globalVar, line 5)
+(TOKEN, =, line 5)
+(TOKEN, 10, line 5)
+(TOKEN, ;, line 5)
+(TOKEN, std, line 6)
+(TOKEN, string, line 6)
+(TOKEN, globalStr, line 6)
+(TOKEN, =, line 6)
+(TOKEN, 20, line 6)
+(TOKEN, ;, line 6)
+(TOKEN, float, line 7)
+(TOKEN, pi, line 7)
+(TOKEN, =, line 7)
+(TOKEN, 3, line 7)
+(TOKEN, 14, line 7)
+(TOKEN, ;, line 7)
+(TOKEN, void, line 10)
+(TOKEN, iterativeFunction, line 10)
+(TOKEN, (, line 10)
+(TOKEN, int, line 10)
+(TOKEN, n, line 10)
+(TOKEN, ), line 10)
+(TOKEN, {, line 10)
+(TOKEN, int, line 11)
+(TOKEN, localVar, line 11)
+(TOKEN, =, line 11)
+(TOKEN, 5, line 11)
+(TOKEN, ;, line 11)
+(TOKEN, std, line 12)
+(TOKEN, string, line 12)
+(TOKEN, localStr, line 12)
+(TOKEN, =, line 12)
+(TOKEN, "Hello, world!", line 12)
+(TOKEN, ;, line 12)
+(TOKEN, float, line 14)
+(TOKEN, pi, line 14)
+(TOKEN, =, line 14)
+(TOKEN, 6, line 14)
+(TOKEN, ;, line 14)
+(TOKEN, for, line 16)
+(TOKEN, (, line 16)
+(TOKEN, int, line 16)
+(TOKEN, i, line 16)
+(TOKEN, =, line 16)
+(TOKEN, 0, line 16)
+(TOKEN, ;, line 16)
+(TOKEN, i, line 16)
+(TOKEN, <, line 16)
+(TOKEN, n, line 16)
+(TOKEN, ;, line 16)
+(TOKEN, i, line 16)
+(TOKEN, +, line 16)
+(TOKEN, +, line 16)
+(TOKEN, ), line 16)
+(TOKEN, {, line 16)
+(TOKEN, localVar, line 17)
+(TOKEN, +, line 17)
+(TOKEN, =, line 17)
+(TOKEN, i, line 17)
+(TOKEN, ;, line 17)
+(TOKEN, if, line 19)
+(TOKEN, (, line 19)
+(TOKEN, localVar, line 19)
+(TOKEN, >, line 19)
+(TOKEN, 50, line 19)
+(TOKEN, ), line 19)
+(TOKEN, {, line 19)
+(TOKEN, break, line 20)
+(TOKEN, ;, line 20)
+(TOKEN, }, line 21)
+(TOKEN, }, line 22)
+(TOKEN, }, line 23)
+(TOKEN, int, line 26)
+(TOKEN, recursiveFunction, line 26)
+(TOKEN, (, line 26)
+(TOKEN, int, line 26)
+(TOKEN, n, line 26)
+(TOKEN, ), line 26)
+(TOKEN, {, line 26)
+(TOKEN, if, line 27)
+(TOKEN, (, line 27)
+(TOKEN, n, line 27)
+(TOKEN, <, line 27)
+(TOKEN, =, line 27)
+(TOKEN, 1, line 27)
+(TOKEN, ), line 27)
+(TOKEN, {, line 27)
+(TOKEN, return, line 28)
+(TOKEN, n, line 28)
+(TOKEN, ;, line 28)
+(TOKEN, }, line 29)
+(TOKEN, return, line 30)
+(TOKEN, n, line 30)
+(TOKEN, +, line 30)
+(TOKEN, recursiveFunction, line 30)
+(TOKEN, (, line 30)
+(TOKEN, n, line 30)
+(TOKEN, -, line 30)
+(TOKEN, 1, line 30)
+(TOKEN, ), line 30)
+(TOKEN, ;, line 30)
+(TOKEN, }, line 31)
+(TOKEN, int, line 33)
+(TOKEN, main, line 33)
+(TOKEN, (, line 33)
+(TOKEN, ), line 33)
+(TOKEN, {, line 33)
+(TOKEN, int, line 34)
+(TOKEN, x, line 34)
+(TOKEN, =, line 34)
+(TOKEN, 5, line 34)
+(TOKEN, ;, line 34)
+(TOKEN, std, line 35)
+(TOKEN, string, line 35)
+(TOKEN, s, line 35)
+(TOKEN, =, line 35)
+(TOKEN, "123", line 35)
+(TOKEN, ;, line 35)
+(TOKEN, float, line 36)
+(TOKEN, y, line 36)
+(TOKEN, =, line 36)
+(TOKEN, 1, line 36)
+(TOKEN, 234, line 36)
+(TOKEN, ;, line 36)
+(TOKEN, for, line 38)
+(TOKEN, (, line 38)
+(TOKEN, int, line 38)
+(TOKEN, i, line 38)
+(TOKEN, =, line 38)
+(TOKEN, 0, line 38)
+(TOKEN, ;, line 38)
+(TOKEN, i, line 38)
+(TOKEN, <, line 38)
+(TOKEN, 10, line 38)
+(TOKEN, ;, line 38)
+(TOKEN, i, line 38)
+(TOKEN, +, line 38)
+(TOKEN, +, line 38)
+(TOKEN, ), line 38)
+(TOKEN, {, line 38)
+(TOKEN, x, line 39)
+(TOKEN, +, line 39)
+(TOKEN, =, line 39)
+(TOKEN, i, line 39)
+(TOKEN, ;, line 39)
+(TOKEN, if, line 40)
+(TOKEN, (, line 40)
+(TOKEN, x, line 40)
+(TOKEN, >, line 40)
+(TOKEN, 50, line 40)
+(TOKEN, ), line 40)
+(TOKEN, {, line 40)
+(TOKEN, break, line 42)
+(TOKEN, ;, line 42)
+(TOKEN, }, line 43)
+(TOKEN, }, line 44)
+(TOKEN, std, line 46)
+(TOKEN, cout, line 46)
+(TOKEN, <, line 46)
+(TOKEN, <, line 46)
+(TOKEN, "Program completat.", line 46)
+(TOKEN, <, line 46)
+(TOKEN, <, line 46)
+(TOKEN, std, line 46)
+(TOKEN, endl, line 46)
+(TOKEN, ;, line 46)
+(TOKEN, return, line 47)
+(TOKEN, 0, line 47)
+(TOKEN, ;, line 47)
+(TOKEN, }, line 48)
