@@ -1,5 +1,3 @@
-<for, line 210>
-<if, line 280>
 void iterativeFunction(int n) is iterative
 Local Variables:
 - int localVar = 5
@@ -7,20 +5,20 @@ Local Variables:
 - float pi = 6
 - int i = 0
 Control Structures:
-- for, line 113
-- if, line 113
-<if, line 376>
-int recursiveFunction(int n) is neither iterative nor recursive
+- for, line 16
+- if, line 19
+
+int recursiveFunction(int n) is recursive
 Control Structures:
-- if, line 371
-<for, line 561>
-<if, line 617>
-int main() is main
+- if, line 27
+
+int main() is iterative
 Local Variables:
 - int x = 5
 - string s = "123"
 - float y = 1.234
 - int i = 0
 Control Structures:
-- for, line 489
-- if, line 489
+- for, line 38
+- if, line 40
+
