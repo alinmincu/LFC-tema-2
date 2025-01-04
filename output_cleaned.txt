@@ -1,3 +1,4 @@
+Error: Function main() not found.
 Error: Invalid initialization for variable globalStr with value 20.
 Error: Variable pi is already declared.
 Error: Variable i is already declared.
@@ -35,7 +36,7 @@ int recursiveFunction(int n) {
     return n + recursiveFunction(n - 1); 
 }
 
-int main() {
+int () {
     int x = 5; 
     std::string s = "123"; 
     float y = 1.234; 

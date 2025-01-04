@@ -201,12 +201,21 @@ int main() {
 
     std::string cleanedCode = removeComments(code);
 
+    // Verificare dacă funcția main există
+    if (cleanedCode.find("int main(") == std::string::npos) {
+        cleanedOutputFile << "Error: Function main() not found.\n";
+    }
+
+    // Analizează variabilele globale
     analyzeGlobalVariables(cleanedCode, globalVariables, outputFile);
 
+    // Analizează funcțiile
     analyzeFunctions(cleanedCode, functions, outputFile);
 
+    // Analizează tokenurile
     analyzeTokens(cleanedCode, outputFile);
 
+    // Detectează erori și generează cod curățat
     std::regex varDeclarationRegex("(int|float|string)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^;]+);");
     std::smatch match;
     std::string::const_iterator searchStart(cleanedCode.cbegin());
@@ -242,3 +251,4 @@ int main() {
 
     return 0;
 }
+
