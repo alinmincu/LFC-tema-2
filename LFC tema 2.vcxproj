@@ -129,14 +129,21 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Lexer.cpp" />
+    <ClCompile Include="Parser.cpp" />
+    <ClCompile Include="SemanticAnalyzer.cpp" />
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Lexer.h" />
+    <ClInclude Include="Parser.h" />
+    <ClInclude Include="SemanticAnalyzer.h" />
     <ClInclude Include="Token.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="in.txt" />
+    <Text Include="input.txt" />
+    <Text Include="output.txt" />
+    <Text Include="output_cleaned.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

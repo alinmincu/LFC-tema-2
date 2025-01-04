@@ -1,0 +1,57 @@
+Error: Invalid initialization for variable globalVar with value aab.
+Error: Invalid initialization for variable globalStr with value 20.
+Error: Variable localVar is already declared.
+Error: Variable pi is already declared.
+Error: Invalid initialization for variable s with value 123.
+Error: Variable i is already declared.
+
+Cleaned Code:
+﻿#include <iostream>
+#include <string>
+
+
+int globalVar = aab; 
+string globalStr = 20; 
+float pi = 3.14;
+
+
+void iterativeFunction(int n) {
+    int localVar = 5; 
+    string localStr = "Hello, world!"; 
+    int localVar = 15; 
+    float pi = 6;
+
+    for (int i = 0; i < n; i++) {
+        localVar += i;
+        
+        if (localVar > 50) {
+            break;
+        }
+    }
+}
+
+
+int recursiveFunction(int n) {
+    if (n <= 1) {
+        return n;
+    }
+    return n + recursiveFunction(n - 1); 
+}
+
+int main() {
+    int x = 5; 
+    string s = 123; 
+    float y = 1.234; 
+
+    for (int i = 0; i < 10; i++) {
+        x += i; 
+        if (x > 50) {
+            
+            break;
+        }
+    }
+
+    std::cout << "Program completat." << std::endl;
+    return 0;
+}
+

@@ -12,16 +12,23 @@ void Lexer::tokenize() {
     char ch;
     std::string currentLexeme;
 
+    bool isGlobalScope = true;
+
     while (stream.get(ch)) {
         if (ch == '\n') {
             currentLine++;
         }
 
         if (isspace(ch)) {
-            continue; // Ignorăm spațiile
+            continue;
         }
 
-        if (isalpha(ch) || ch == '_') {  // Identificatori și cuvinte cheie
+        if (ch == '/') {
+            skipComment(ch, stream);
+            continue;
+        }
+
+        if (isalpha(ch) || ch == '_') {
             currentLexeme = ch;
             while (stream.get(ch) && (isalnum(ch) || ch == '_')) {
                 currentLexeme += ch;
@@ -30,17 +37,48 @@ void Lexer::tokenize() {
 
             if (isKeyword(currentLexeme)) {
                 addToken(TokenType::KEYWORD, currentLexeme);
+
+                // Detectăm variabilele globale
+                if (isGlobalScope && (currentLexeme == "int" || currentLexeme == "float" || currentLexeme == "string")) {
+                    std::string type = currentLexeme;
+                    std::string name;
+                    std::string value;
+
+                    // Citim numele variabilei
+                    while (stream.get(ch) && isspace(ch)); // Ignorăm spațiile
+                    if (isalpha(ch) || ch == '_') {
+                        name = ch;
+                        while (stream.get(ch) && (isalnum(ch) || ch == '_')) {
+                            name += ch;
+                        }
+
+                        // Citim valoarea inițială, dacă există
+                        if (ch == '=') {
+                            while (stream.get(ch) && ch != ';') {
+                                value += ch; // Construim valoarea
+                            }
+                        }
+
+                        // Adăugăm variabila globală
+                        addGlobalVariable(name, type, value);
+                    }
+                }
+
+                // Verificăm dacă am ieșit din scope-ul global
+                if (currentLexeme == "void" || currentLexeme == "int" || currentLexeme == "float") {
+                    isGlobalScope = false;
+                }
             }
             else {
                 addToken(TokenType::IDENTIFIER, currentLexeme);
             }
         }
-        else if (isdigit(ch)) {  // Numere
+        else if (isdigit(ch)) {
             currentLexeme = ch;
             while (stream.get(ch) && (isdigit(ch) || ch == '.')) {
                 currentLexeme += ch;
             }
-            stream.unget(); // Ultimul caracter care nu e parte din număr
+            stream.unget();
             if (isNumber(currentLexeme)) {
                 addToken(TokenType::NUMBER, currentLexeme);
             }
@@ -48,63 +86,73 @@ void Lexer::tokenize() {
                 addToken(TokenType::ERROR, currentLexeme);
             }
         }
-        else if (ch == '"' || ch == '\'') {  // Șiruri de caractere
-            char quoteType = ch;  // Stochează tipul ghilimelei
+        else if (ch == '"' || ch == '\'') {
+            char quoteType = ch;
             currentLexeme = ch;
             while (stream.get(ch)) {
                 currentLexeme += ch;
-                if (ch == quoteType) {  // Închidere ghilimele
+                if (ch == quoteType) {
                     addToken(TokenType::STRING_LITERAL, currentLexeme);
                     break;
                 }
-                if (ch == '\n') {  // Eroare: ghilimelele nu s-au închis pe aceeași linie
+                if (ch == '\n') {
                     addToken(TokenType::ERROR, currentLexeme);
                     break;
                 }
             }
-            if (currentLexeme.back() != quoteType) {  // Dacă nu s-au închis corect
-                addToken(TokenType::ERROR, currentLexeme);
-            }
         }
-        else if (isOperator(ch)) {  // Operatorii
+        else if (isOperator(ch)) {
             currentLexeme = ch;
             char nextCh;
             if (stream.get(nextCh)) {
                 std::string combined = currentLexeme + nextCh;
-                if (isOperator(combined)) {  // Operator format din două caractere (e.g., ==, !=, etc.)
+                if (isOperator(combined)) {
                     currentLexeme = combined;
                 }
                 else {
-                    stream.unget();  // Nu face parte din operator
+                    stream.unget();
                 }
             }
             addToken(TokenType::OPERATOR, currentLexeme);
         }
-        else if (isDelimiter(ch)) {  // Delimitatori
+        else if (isDelimiter(ch)) {
             currentLexeme = ch;
             addToken(TokenType::DELIMITER, currentLexeme);
         }
-        else {  // Altele, le considerăm erori
+        else {
             currentLexeme = ch;
             addToken(TokenType::ERROR, currentLexeme);
         }
     }
 }
 
-const std::vector<Token>& Lexer::getTokens() const {
-    return tokens;
+void Lexer::skipComment(char& ch, std::istringstream& stream) {
+    if (ch == '/') {
+        char nextChar;
+        stream.get(nextChar);
+        if (nextChar == '/') { // Linie de comentariu
+            while (stream.get(ch) && ch != '\n');
+        }
+        else if (nextChar == '*') { // Comentariu multi-linie
+            while (stream.get(ch)) {
+                if (ch == '*' && stream.peek() == '/') {
+                    stream.get(ch);
+                    break;
+                }
+            }
+        }
+        else {
+            stream.unget();
+        }
+    }
 }
 
-void Lexer::printTokens() const {
-    for (const auto& token : tokens) {
-        std::cout << "(" << (token.type == KEYWORD ? "KEYWORD" :
-            token.type == IDENTIFIER ? "IDENTIFIER" :
-            token.type == OPERATOR ? "OPERATOR" :
-            token.type == NUMBER ? "NUMBER" :
-            token.type == STRING_LITERAL ? "STRING_LITERAL" :
-            token.type == DELIMITER ? "DELIMITER" : "ERROR")
-            << ", " << token.value << ", " << token.line << ")\n";
+bool Lexer::isComment(char ch, std::istringstream& stream) {
+    if (ch == '/') {
+        char nextChar = stream.peek();
+        return nextChar == '/' || nextChar == '*';
     }
+    return false;
 }
 
 void Lexer::addToken(TokenType type, const std::string& value) {
@@ -130,13 +178,88 @@ bool Lexer::isDelimiter(char c) {
 
 bool Lexer::isKeyword(const std::string& lexeme) {
     static const std::unordered_set<std::string> keywords = {
-        "int", "float", "string", "if", "else", "while", "for", "void",
-        "return", "break", "continue"
+        "int", "float", "string", "void", "if", "else", "while", "for", "return",
+        "break", "continue"
     };
     return keywords.find(lexeme) != keywords.end();
 }
 
 bool Lexer::isNumber(const std::string& lexeme) {
-    std::regex numberRegex(R"(^(\d+(\.\d*)?|\.\d+)$)"); // Regula pentru numere întregi sau zecimale
+    std::regex numberRegex(R"(^(\d+(\.\d*)?|\.\d+)$)");
     return std::regex_match(lexeme, numberRegex);
+}
+
+const std::vector<Token>& Lexer::getTokens() const {
+    return tokens;
+}
+
+const std::vector<GlobalVariable>& Lexer::getGlobalVariables() const {
+    return globalVariables;
+}
+
+const std::vector<FunctionInfo>& Lexer::getFunctions() const {
+    return functions;
+}
+
+void Lexer::printTokens() const {
+    for (const auto& token : tokens) {
+        std::cout << "(" << (token.type == KEYWORD ? "KEYWORD" :
+            token.type == IDENTIFIER ? "IDENTIFIER" :
+            token.type == OPERATOR ? "OPERATOR" :
+            token.type == NUMBER ? "NUMBER" :
+            token.type == STRING_LITERAL ? "STRING_LITERAL" :
+            token.type == DELIMITER ? "DELIMITER" : "ERROR")
+            << ", " << token.value << ", " << token.line << ")\n";
+    }
+}
+
+void Lexer::printGlobalVariables() const {
+    std::cout << "Global Variables:\n";
+
+    if (globalVariables.empty()) {
+        std::cout << "No global variables found.\n";
+        return;
+    }
+
+    for (const auto& var : globalVariables) {
+        std::cout << "Type: " << var.type
+            << ", Name: " << var.name
+            << ", Initial Value: " << (var.value.empty() ? "EMPTY" : var.value) << "\n";
+    }
+}
+
+void Lexer::printFunctions() const {
+    std::cout << "Functions:\n";
+    for (const auto& func : functions) {
+        std::cout << "Name: " << func.name << ", Type: " << func.type
+            << ", Recursive: " << (func.isRecursive ? "Yes" : "No") << "\n";
+        std::cout << "Parameters: " << func.parameters << "\n";
+        std::cout << "Local Variables:\n";
+        for (const auto& var : func.localVariables) {
+            std::cout << "  " << var << "\n";
+        }
+        std::cout << "Control Structures:\n";
+        for (const auto& control : func.controlStructures) {
+            std::cout << "  " << control << "\n";
+        }
+        std::cout << "\n";
+    }
+}
+
+void Lexer::printErrors() const {
+    std::cout << "Errors:\n";
+    for (const auto& token : tokens) {
+        if (token.type == ERROR) {
+            std::cout << "Lexical Error at line " << token.line << ": Invalid token '" << token.value << "'\n";
+        }
+    }
+}
+
+void Lexer::addGlobalVariable(const std::string& name, const std::string& type, const std::string& value) {
+    globalVariables.push_back({ name, type, value });
+
+    // Debugging
+    std::cout << "Debug: Global variable added - Type: " << type
+        << ", Name: " << name
+        << ", Value: " << (value.empty() ? "EMPTY" : value) << "\n";
 }
