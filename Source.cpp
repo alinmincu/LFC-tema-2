@@ -55,7 +55,7 @@ std::string removeComments(const std::string& code) {
     return cleanedCode;
 }
 
-std::string getTokenType(const std::string& token, const std::string& nextToken = "") {
+std::string getTokenType(const std::string& token) {
     static const std::unordered_set<std::string> keywords = {
         "int", "float", "string", "void", "if", "else", "for", "while", "return"
     };
@@ -70,12 +70,6 @@ std::string getTokenType(const std::string& token, const std::string& nextToken 
     if (std::regex_match(token, std::regex(R"([-+*/=<>!&|])"))) return "OPERATOR";
     if (std::regex_match(token, std::regex(R"(\d+\.\d+|\d+)"))) return "NUMBER";
     if (std::regex_match(token, std::regex(R"(".*?")"))) return "STRING";
-
-    // Check if the token is a function name (look ahead for '(')
-    if (!nextToken.empty() && nextToken == "(") {
-        return "FUNCTION_NAME";
-    }
-
     if (std::regex_match(token, std::regex(R"([a-zA-Z_][a-zA-Z0-9_]*)"))) return "VARIABLE";
 
     return "UNKNOWN";
@@ -88,27 +82,15 @@ void analyzeTokens(const std::string& code, std::ofstream& outputFile) {
     std::string line;
     int lineNumber = 0;
 
-    outputFile << "Lexical Units:\n";
+    outputFile << "\nLexical Units:\n";
     while (std::getline(stream, line)) {
         ++lineNumber;
         auto searchStart = line.cbegin();
-        std::string nextToken;
-
         while (std::regex_search(searchStart, line.cend(), match, tokenRegex)) {
             std::string token = match.str();
-
-            // Look ahead for the next token
-            auto nextSearchStart = match.suffix().first;
-            if (std::regex_search(nextSearchStart, line.cend(), match, tokenRegex)) {
-                nextToken = match.str();
-            }
-            else {
-                nextToken.clear();
-            }
-
-            std::string tokenType = getTokenType(token, nextToken);
+            std::string tokenType = getTokenType(token);
             outputFile << "(" << tokenType << ", " << token << ", line " << lineNumber << ")\n";
-            searchStart = nextSearchStart;
+            searchStart = match.suffix().first;
         }
     }
 }
@@ -144,7 +126,7 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
     std::smatch match;
     std::string::const_iterator searchStart(code.cbegin());
 
-    outputFile << "Functions:\n";
+    outputFile << "\nFunctions:\n";
 
     while (std::regex_search(searchStart, code.cend(), match, functionRegex)) {
         Function func;
