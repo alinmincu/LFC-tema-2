@@ -182,15 +182,14 @@ int main() {
     std::string code((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
     inputFile.close();
 
-    std::ofstream outputFile("output.txt");
-    if (!outputFile) {
-        std::cerr << "Error: Could not open output file.\n";
-        return 1;
-    }
+    // Fișiere de output
+    std::ofstream lexicalFile("lexical_units.txt");
+    std::ofstream globalVarFile("global_variables.txt");
+    std::ofstream functionsFile("functions.txt");
+    std::ofstream errorsFile("errors.txt");
 
-    std::ofstream cleanedOutputFile("output_cleaned.txt");
-    if (!cleanedOutputFile) {
-        std::cerr << "Error: Could not open cleaned output file.\n";
+    if (!lexicalFile || !globalVarFile || !functionsFile || !errorsFile) {
+        std::cerr << "Error: Could not open output files.\n";
         return 1;
     }
 
@@ -199,23 +198,24 @@ int main() {
     std::vector<Variable> globalVariables;
     std::vector<Function> functions;
 
+    // Eliminare comentarii
     std::string cleanedCode = removeComments(code);
 
-    // Verificare dacă funcția main există
+    // Verificare existența funcției main
     if (cleanedCode.find("int main(") == std::string::npos) {
-        cleanedOutputFile << "Error: Function main() not found.\n";
+        errorsFile << "Error: Function main() not found.\n";
     }
 
+    // Analizează unitățile lexicale
+    analyzeTokens(cleanedCode, lexicalFile);
+
     // Analizează variabilele globale
-    analyzeGlobalVariables(cleanedCode, globalVariables, outputFile);
+    analyzeGlobalVariables(cleanedCode, globalVariables, globalVarFile);
 
     // Analizează funcțiile
-    analyzeFunctions(cleanedCode, functions, outputFile);
+    analyzeFunctions(cleanedCode, functions, functionsFile);
 
-    // Analizează tokenurile
-    analyzeTokens(cleanedCode, outputFile);
-
-    // Detectează erori și generează cod curățat
+    // Detectare și semnalare erori
     std::regex varDeclarationRegex("(int|float|string)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^;]+);");
     std::smatch match;
     std::string::const_iterator searchStart(cleanedCode.cbegin());
@@ -226,7 +226,7 @@ int main() {
         std::string value = match[3];
 
         if (declaredVariables.find(varName) != declaredVariables.end()) {
-            cleanedOutputFile << "Error: Variable " << varName << " is already declared.\n";
+            errorsFile << "Error: Variable " << varName << " is already declared.\n";
             invalidLines.insert(match.str());
         }
         else {
@@ -234,21 +234,21 @@ int main() {
                 declaredVariables.insert(varName);
             }
             else {
-                cleanedOutputFile << "Error: Invalid initialization for variable " << varName << " with value " << value << ".\n";
+                errorsFile << "Error: Invalid initialization for variable " << varName << " with value " << value << ".\n";
                 invalidLines.insert(match.str());
             }
         }
         searchStart = match.suffix().first;
     }
 
-    cleanedCode = removeInvalidDeclarations(cleanedCode, invalidLines);
+    // Închiderea fișierelor
+    lexicalFile.close();
+    globalVarFile.close();
+    functionsFile.close();
+    errorsFile.close();
 
-    cleanedOutputFile << "\nCleaned Code:\n" << cleanedCode << "\n";
-    cleanedOutputFile.close();
-    outputFile.close();
-
-    std::cout << "Analysis completed. Check 'output.txt' and 'output_cleaned.txt' for results.\n";
-
+    std::cout << "Analysis completed. Check the generated files for results.\n";
     return 0;
 }
+
 

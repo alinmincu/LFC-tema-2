@@ -131,7 +131,11 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Text Include="errors.txt" />
+    <Text Include="functions.txt" />
+    <Text Include="global_variables.txt" />
     <Text Include="input.txt" />
+    <Text Include="lexical_units.txt" />
     <Text Include="output.txt" />
     <Text Include="output_cleaned.txt" />
   </ItemGroup>

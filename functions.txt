@@ -1,0 +1,4 @@
+
+Functions:
+void iterativeFunction(int n) is iterative
+int recursiveFunction(int n) is recursive

@@ -1,0 +1,8 @@
+Global Variables:
+int globalVar = 10
+string globalStr = 20
+float pi = 3.14
+int x = 5
+string s = "123"
+float y = 1.234
+int i = 0
