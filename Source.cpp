@@ -123,16 +123,18 @@ void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& glob
 
 void analyzeFunctions(const std::string& code, std::vector<Function>& functions, std::ofstream& outputFile) {
     std::regex functionRegex("(int|float|string|void)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*\\(([^)]*)\\)\\s*\\{");
+    std::regex localVarRegex("(int|float|string)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^;]+);");
+    std::regex controlStructureRegex("(if|else if|else|for|while)");
     std::smatch match;
     std::string::const_iterator searchStart(code.cbegin());
-
-    outputFile << "\nFunctions:\n";
 
     while (std::regex_search(searchStart, code.cend(), match, functionRegex)) {
         Function func;
         func.returnType = match[1];
         func.name = match[2];
+        func.line = std::distance(code.cbegin(), match[0].first) + 1;
 
+        // Extrage parametrii funcției
         std::string params = match[3];
         std::istringstream paramStream(params);
         std::string param;
@@ -144,14 +146,35 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
             }
         }
 
+        // Determină corpul funcției
         std::string functionBody = match.suffix().str();
-        std::string functionStart = match[0].str();
+        size_t endPos = functionBody.find("}");
+        if (endPos != std::string::npos) {
+            functionBody = functionBody.substr(0, endPos);
+        }
 
+        // Detectează variabilele locale
+        std::smatch localVarMatch;
+        std::string::const_iterator localSearchStart(functionBody.cbegin());
+        while (std::regex_search(localSearchStart, functionBody.cend(), localVarMatch, localVarRegex)) {
+            func.localVariables.push_back({ localVarMatch[1], localVarMatch[2], localVarMatch[3], func.line });
+            localSearchStart = localVarMatch.suffix().first;
+        }
+
+        // Detectează structurile de control
+        std::smatch controlMatch;
+        std::string::const_iterator controlSearchStart(functionBody.cbegin());
+        while (std::regex_search(controlSearchStart, functionBody.cend(), controlMatch, controlStructureRegex)) {
+            int lineNumber = std::distance(functionBody.cbegin(), controlMatch[0].first) + func.line;
+            outputFile << "<" << controlMatch.str() << ", line " << lineNumber << ">\n";
+            controlSearchStart = controlMatch.suffix().first;
+        }
+
+        // Determină dacă funcția este recursivă sau iterativă
         bool isRecursive = functionBody.find(func.name + "(") != std::string::npos;
         bool isIterative = functionBody.find("for") != std::string::npos || functionBody.find("while") != std::string::npos;
 
-        functions.push_back(func);
-
+        // Scrie funcția în fișier
         outputFile << func.returnType << " " << func.name << "(";
         for (size_t i = 0; i < func.parameters.size(); ++i) {
             outputFile << func.parameters[i].type << " " << func.parameters[i].name;
@@ -159,18 +182,40 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
         }
         outputFile << ") is ";
         if (isRecursive) {
-            outputFile << "recursive\n";
+            outputFile << "recursive";
+        }
+        else if (func.name == "main") {
+            outputFile << "main";
         }
         else if (isIterative) {
-            outputFile << "iterative\n";
+            outputFile << "iterative";
         }
         else {
-            outputFile << "neither iterative nor recursive\n";
+            outputFile << "neither iterative nor recursive";
+        }
+        outputFile << "\n";
+
+        // Variabile locale
+        if (!func.localVariables.empty()) {
+            outputFile << "Local Variables:\n";
+            for (const auto& var : func.localVariables) {
+                outputFile << "- " << var.type << " " << var.name << " = " << var.value << "\n";
+            }
         }
 
+        // Structuri de control
+        outputFile << "Control Structures:\n";
+        std::string::const_iterator searchStartStruct(functionBody.cbegin());
+        while (std::regex_search(searchStartStruct, functionBody.cend(), controlMatch, controlStructureRegex)) {
+            outputFile << "- " << controlMatch[1] << ", line " << func.line << "\n";
+            searchStartStruct = controlMatch.suffix().first;
+        }
+
+        functions.push_back(func);
         searchStart = match.suffix().first;
     }
 }
+
 
 int main() {
     std::ifstream inputFile("input.txt");

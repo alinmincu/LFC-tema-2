@@ -113,6 +113,7 @@ Lexical Units:
 (DELIMITER, ;, line 30)
 (DELIMITER, }, line 31)
 (KEYWORD, int, line 33)
+(VARIABLE, main, line 33)
 (DELIMITER, (, line 33)
 (DELIMITER, ), line 33)
 (DELIMITER, {, line 33)
