@@ -98,7 +98,6 @@ void analyzeTokens(const std::string& code, std::ofstream& outputFile) {
         while (std::regex_search(searchStart, line.cend(), match, tokenRegex)) {
             std::string token = match.str();
 
-            // Look ahead for the next token
             auto nextSearchStart = match.suffix().first;
             if (std::regex_search(nextSearchStart, line.cend(), match, tokenRegex)) {
                 nextToken = match.str();
@@ -154,26 +153,22 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
         lineCounter++;
         currentCode += line + "\n";
 
-        // Check for a function definition
         if (std::regex_search(currentCode, match, functionRegex)) {
             Function func;
             func.returnType = match[1];
             func.name = match[2];
             func.line = lineCounter;
 
-            // Extract function parameters
             std::string params = match[3];
-            // Extract function parameters
             std::regex paramRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*))");
             std::smatch paramMatch;
             std::string::const_iterator searchStart(params.cbegin());
 
             while (std::regex_search(searchStart, params.cend(), paramMatch, paramRegex)) {
                 func.parameters.push_back({ paramMatch[1], paramMatch[2], "", func.line });
-                searchStart = paramMatch.suffix().first; // Avansează după parametrul curent
+                searchStart = paramMatch.suffix().first; 
             }
 
-            // Verificare pentru parametrii duplicat
             std::unordered_set<std::string> parameterNames;
             for (const auto& param : func.parameters) {
                 if (parameterNames.find(param.name) != parameterNames.end()) {
@@ -185,15 +180,12 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 }
             }
 
-            // Capture function body using brace counting
             std::string functionBody;
-            int braceCount = 1; // Start with 1 because we've matched the opening brace
+            int braceCount = 1;
             size_t startPos = currentCode.find('{', match.position());
 
-            // Include everything after the opening brace in the body
             functionBody = currentCode.substr(startPos + 1);
 
-            // Continue reading lines until all braces are balanced
             while (braceCount > 0 && std::getline(stream, line)) {
                 lineCounter++;
                 for (char ch : line) {
@@ -203,7 +195,6 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 functionBody += line + "\n";
             }
 
-            // Verificare dacă corpul funcției este complet (acolade echilibrate)
             if (braceCount != 0) {
                 errorsFile << "Error: Incomplete function body for '" << func.name << "'.\n";
                 std::cerr << "Debug: Incomplete function detected - " << func.name << "\n";
@@ -211,14 +202,12 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 continue;
             }
 
-            // Verificare pentru funcțiile non-void fără return
             if (func.returnType != "void" && functionBody.find("return") == std::string::npos) {
                 errorsFile << "Error: Non-void function '" << func.name
                     << "' does not have a return statement.\n";
             }
 
 
-            // Detect local variables
             std::smatch localVarMatch;
             std::string::const_iterator localSearchStart(functionBody.cbegin());
             while (std::regex_search(localSearchStart, functionBody.cend(), localVarMatch, localVarRegex)) {
@@ -226,7 +215,6 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 localSearchStart = localVarMatch.suffix().first;
             }
 
-            // Detect control structures
             std::smatch controlMatch;
             std::string::const_iterator controlSearchStart(functionBody.cbegin());
             std::vector<std::pair<std::string, int>> controlStructures;
@@ -241,12 +229,10 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 controlSearchStart = controlMatch.suffix().first;
             }
 
-            // Determine if function is recursive or iterative
             std::regex recursiveCallRegex("\\b" + func.name + "\\s*\\(");
             bool isRecursive = std::regex_search(functionBody, recursiveCallRegex);
             bool isIterative = functionBody.find("for") != std::string::npos || functionBody.find("while") != std::string::npos;
 
-            // Write function details
             outputFile << func.returnType << " " << func.name << "(";
             for (size_t i = 0; i < func.parameters.size(); ++i) {
                 outputFile << func.parameters[i].type << " " << func.parameters[i].name;
@@ -267,7 +253,6 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
             }
             outputFile << "\n";
 
-            // Write local variables
             if (!func.localVariables.empty()) {
                 outputFile << "Local Variables:\n";
                 for (const auto& var : func.localVariables) {
@@ -275,7 +260,6 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 }
             }
 
-            // Write control structures
             if (!controlStructures.empty()) {
                 outputFile << "Control Structures:\n";
                 for (const auto& [control, structureLine] : controlStructures) {
@@ -284,7 +268,7 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
             }
 
             functions.push_back(func);
-            currentCode.clear(); // Reset after processing the function
+            currentCode.clear(); 
 
             outputFile << "\n";
         }
@@ -301,7 +285,6 @@ int main() {
     std::string code((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
     inputFile.close();
 
-    // Open output files
     std::ofstream lexicalFile("lexical_units.txt");
     std::ofstream globalVarFile("global_variables.txt");
     std::ofstream functionsFile("functions.txt");
@@ -317,24 +300,18 @@ int main() {
     std::vector<Variable> globalVariables;
     std::vector<Function> functions;
 
-    // Remove comments
     std::string cleanedCode = removeComments(code);
 
-    // Save cleaned code to output.txt
     outputFile << "Cleaned Code:\n" << cleanedCode;
 
-    // Check for main function
     if (cleanedCode.find("int main(") == std::string::npos) {
         errorsFile << "Error: Function main() not found.\n";
     }
 
-    // Analyze lexical units
     analyzeTokens(cleanedCode, lexicalFile);
 
-    // Analyze global variables
     analyzeGlobalVariables(cleanedCode, globalVariables, globalVarFile);
 
-    // Check for duplicate global variables
     for (const auto& var : globalVariables) {
         if (declaredGlobalVariables.find(var.name) != declaredGlobalVariables.end()) {
             errorsFile << "Error: Global variable '" << var.name << "' is already declared.\n";
@@ -348,10 +325,8 @@ int main() {
         }
     }
 
-    // Analyze functions
     analyzeFunctions(cleanedCode, functions, functionsFile, errorsFile);
 
-    // Check for duplicate local variables within functions
     for (const auto& func : functions) {
         std::unordered_set<std::string> declaredLocalVariables;
         for (const auto& localVar : func.localVariables) {
@@ -369,7 +344,6 @@ int main() {
         }
     }
 
-    // Close files
     lexicalFile.close();
     globalVarFile.close();
     functionsFile.close();
