@@ -6,6 +6,8 @@
 #include <sstream>
 #include <vector>
 
+int code = 10;
+
 struct Variable {
     std::string type;
     std::string name;
@@ -231,7 +233,10 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 if (i < func.parameters.size() - 1) outputFile << ", ";
             }
             outputFile << ") is ";
-            if (isRecursive) {
+			if (func.name == "main") {
+				outputFile << "the main function";
+			}
+			else if (isRecursive) {
                 outputFile << "recursive";
             }
             else if (isIterative) {
@@ -261,7 +266,7 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
             functions.push_back(func);
             currentCode.clear(); // Reset after processing the function
 
-			outputFile << "\n";
+            outputFile << "\n";
         }
     }
 }
@@ -276,70 +281,80 @@ int main() {
     std::string code((std::istreambuf_iterator<char>(inputFile)), std::istreambuf_iterator<char>());
     inputFile.close();
 
-    // Fișiere de output
+    // Open output files
     std::ofstream lexicalFile("lexical_units.txt");
     std::ofstream globalVarFile("global_variables.txt");
     std::ofstream functionsFile("functions.txt");
     std::ofstream errorsFile("errors.txt");
+    std::ofstream outputFile("output.txt");
 
-    if (!lexicalFile || !globalVarFile || !functionsFile || !errorsFile) {
+    if (!lexicalFile || !globalVarFile || !functionsFile || !errorsFile || !outputFile) {
         std::cerr << "Error: Could not open output files.\n";
         return 1;
     }
 
-    std::unordered_set<std::string> declaredVariables;
-    std::unordered_set<std::string> invalidLines;
+    std::unordered_set<std::string> declaredGlobalVariables;
     std::vector<Variable> globalVariables;
     std::vector<Function> functions;
 
-    // Eliminare comentarii
+    // Remove comments
     std::string cleanedCode = removeComments(code);
 
-    // Verificare existența funcției main
+    // Save cleaned code to output.txt
+    outputFile << "Cleaned Code:\n" << cleanedCode;
+
+    // Check for main function
     if (cleanedCode.find("int main(") == std::string::npos) {
         errorsFile << "Error: Function main() not found.\n";
     }
 
-    // Analizează unitățile lexicale
+    // Analyze lexical units
     analyzeTokens(cleanedCode, lexicalFile);
 
-    // Analizează variabilele globale
+    // Analyze global variables
     analyzeGlobalVariables(cleanedCode, globalVariables, globalVarFile);
 
-    // Analizează funcțiile
-    analyzeFunctions(cleanedCode, functions, functionsFile);
-
-    // Detectare și semnalare erori
-    std::regex varDeclarationRegex("(int|float|string)\\s+([a-zA-Z_][a-zA-Z0-9_]*)\\s*=\\s*([^;]+);");
-    std::smatch match;
-    std::string::const_iterator searchStart(cleanedCode.cbegin());
-
-    while (std::regex_search(searchStart, cleanedCode.cend(), match, varDeclarationRegex)) {
-        std::string type = match[1];
-        std::string varName = match[2];
-        std::string value = match[3];
-
-        if (declaredVariables.find(varName) != declaredVariables.end()) {
-            errorsFile << "Error: Variable " << varName << " is already declared.\n";
-            invalidLines.insert(match.str());
+    // Check for duplicate global variables
+    for (const auto& var : globalVariables) {
+        if (declaredGlobalVariables.find(var.name) != declaredGlobalVariables.end()) {
+            errorsFile << "Error: Global variable '" << var.name << "' is already declared.\n";
+        }
+        else if (!isInitializationValid(var.type, var.value)) {
+            errorsFile << "Error: Invalid initialization for global variable '" << var.name
+                << "' with value '" << var.value << "'.\n";
         }
         else {
-            if (isInitializationValid(type, value)) {
-                declaredVariables.insert(varName);
-            }
-            else {
-                errorsFile << "Error: Invalid initialization for variable " << varName << " with value " << value << ".\n";
-                invalidLines.insert(match.str());
-            }
+            declaredGlobalVariables.insert(var.name);
         }
-        searchStart = match.suffix().first;
     }
 
-    // Închiderea fișierelor
+    // Analyze functions
+    analyzeFunctions(cleanedCode, functions, functionsFile);
+
+    // Check for duplicate local variables within functions
+    for (const auto& func : functions) {
+        std::unordered_set<std::string> declaredLocalVariables;
+        for (const auto& localVar : func.localVariables) {
+            if (declaredLocalVariables.find(localVar.name) != declaredLocalVariables.end()) {
+                errorsFile << "Error: Variable '" << localVar.name << "' is already declared locally in function '"
+                    << func.name << "'.\n";
+            }
+            else if (!isInitializationValid(localVar.type, localVar.value)) {
+                errorsFile << "Error: Invalid initialization for local variable '" << localVar.name
+                    << "' in function '" << func.name << "' with value '" << localVar.value << "'.\n";
+            }
+            else {
+                declaredLocalVariables.insert(localVar.name);
+            }
+        }
+    }
+
+    // Close files
     lexicalFile.close();
     globalVarFile.close();
     functionsFile.close();
     errorsFile.close();
+    outputFile.close();
 
     std::cout << "Analysis completed. Check the generated files for results.\n";
     return 0;

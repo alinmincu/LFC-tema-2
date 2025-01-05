@@ -1,46 +1,60 @@
 ﻿#include <iostream>
 #include <string>
 
-/* Variabile globale */
-int globalVar = 10; // Variabila globala corecta
-std::string globalStr = 20; // Initializare valida
+// Declarație globală validă
+int globalVar = 10;
+std::string globalStr = "Hello";
 float pi = 3.14;
 
-/* Functie iterativa */
+// Declarație globală duplicată
+int globalVar = 20;
+
+// Funcție iterativă cu variabile locale valide și eronate
 void iterativeFunction(int n) {
-    int localVar = 5; // Variabila locala corecta
-    std::string localStr = "Hello, world!"; // Initializare corecta
-    // Eliminam redeclaratia invalida
-    float pi = 6;
+    int localVar = 5; // Locală validă
+    std::string localStr = "Iterative Function"; // Locală validă
+    
+    // Variabilă locală duplicată
+    int localVar = 10;
 
     for (int i = 0; i < n; i++) {
-        localVar += i;
-        // Comentariu valid
+        localVar += i; // Reutilizare variabilă locală
         if (localVar > 50) {
             break;
         }
     }
 }
 
-/* Functie recursiva */
+// Funcție recursivă cu variabile locale eronate
 int recursiveFunction(int n) {
+    // Variabilă cu inițializare invalidă
+    float invalidFloat = "invalid";
+
     if (n <= 1) {
         return n;
     }
-    return n + recursiveFunction(n - 1); // Apel recursiv valid
+    return n + recursiveFunction(n - 1);
 }
 
+// Funcție cu parametri duplicat
+void parameterFunction(int a, int b, int a) {
+    int x = 10; // Locală validă
+    int x = 20; // Locală duplicată
+}
+
+// Funcție fără implementare completă
+int incompleteFunction(int a, int b) {
+    int y = 5;
+}
+
+// Main-ul programului
 int main() {
-    int x = 5; // Initializare valida
-    std::string s = "123"; // Initializare valida
-    float y = 1.234; // Initializare valida
+    int x = 5; // Locală validă
+    std::string str = 123; // Inițializare invalidă
+    int x = 10; // Duplicată locală
 
     for (int i = 0; i < 10; i++) {
-        x += i; // Operare valida
-        if (x > 50) {
-            // Iesire din bucla daca x > 50
-            break;
-        }
+        x += i; 
     }
 
     std::cout << "Program completat." << std::endl;

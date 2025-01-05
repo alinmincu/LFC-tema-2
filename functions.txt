@@ -1,24 +1,34 @@
 void iterativeFunction(int n) is iterative
 Local Variables:
 - int localVar = 5
-- string localStr = "Hello, world!"
-- float pi = 6
+- string localStr = "Iterative Function"
+- int localVar = 10
 - int i = 0
 Control Structures:
-- for, line 16
-- if, line 19
+- for, line 20
+- if, line 22
 
 int recursiveFunction(int n) is recursive
+Local Variables:
+- float invalidFloat = "invalid"
 Control Structures:
-- if, line 27
+- if, line 33
 
-int main() is iterative
+void parameterFunction(int a) is neither iterative nor recursive
+Local Variables:
+- int x = 10
+- int x = 20
+
+int incompleteFunction(int a) is neither iterative nor recursive
+Local Variables:
+- int y = 5
+
+int main() is the main function
 Local Variables:
 - int x = 5
-- string s = "123"
-- float y = 1.234
+- string str = 123
+- int x = 10
 - int i = 0
 Control Structures:
-- for, line 38
-- if, line 40
+- for, line 56
 

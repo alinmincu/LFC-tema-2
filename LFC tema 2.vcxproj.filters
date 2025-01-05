@@ -21,7 +21,10 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="output.txt" />
-    <Text Include="output_cleaned.txt" />
     <Text Include="input.txt" />
+    <Text Include="errors.txt" />
+    <Text Include="functions.txt" />
+    <Text Include="global_variables.txt" />
+    <Text Include="lexical_units.txt" />
   </ItemGroup>
 </Project>

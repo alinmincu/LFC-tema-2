@@ -1,190 +1,63 @@
-Global Variables:
-int globalVar = 10
-string globalStr = 20
-float pi = 3.14
+Cleaned Code:
+﻿#include <iostream>
+#include <string>
 
-Functions:
-void iterativeFunction(int n) is iterative
-int recursiveFunction(int n) is recursive
-int main() is iterative
 
-Lexical Units:
-(DIRECTIVE_SYMBOL, #, line 1)
-(DIRECTIVE, include, line 1)
-(OPERATOR, <, line 1)
-(HEADER, iostream, line 1)
-(OPERATOR, >, line 1)
-(DIRECTIVE_SYMBOL, #, line 2)
-(DIRECTIVE, include, line 2)
-(OPERATOR, <, line 2)
-(KEYWORD, string, line 2)
-(OPERATOR, >, line 2)
-(KEYWORD, int, line 5)
-(VARIABLE, globalVar, line 5)
-(OPERATOR, =, line 5)
-(NUMBER, 10, line 5)
-(DELIMITER, ;, line 5)
-(NAMESPACE, std, line 6)
-(KEYWORD, string, line 6)
-(VARIABLE, globalStr, line 6)
-(OPERATOR, =, line 6)
-(NUMBER, 20, line 6)
-(DELIMITER, ;, line 6)
-(KEYWORD, float, line 7)
-(VARIABLE, pi, line 7)
-(OPERATOR, =, line 7)
-(NUMBER, 3.14, line 7)
-(DELIMITER, ;, line 7)
-(KEYWORD, void, line 10)
-(VARIABLE, iterativeFunction, line 10)
-(DELIMITER, (, line 10)
-(KEYWORD, int, line 10)
-(VARIABLE, n, line 10)
-(DELIMITER, ), line 10)
-(DELIMITER, {, line 10)
-(KEYWORD, int, line 11)
-(VARIABLE, localVar, line 11)
-(OPERATOR, =, line 11)
-(NUMBER, 5, line 11)
-(DELIMITER, ;, line 11)
-(NAMESPACE, std, line 12)
-(KEYWORD, string, line 12)
-(VARIABLE, localStr, line 12)
-(OPERATOR, =, line 12)
-(STRING, "Hello, world!", line 12)
-(DELIMITER, ;, line 12)
-(KEYWORD, float, line 14)
-(VARIABLE, pi, line 14)
-(OPERATOR, =, line 14)
-(NUMBER, 6, line 14)
-(DELIMITER, ;, line 14)
-(KEYWORD, for, line 16)
-(DELIMITER, (, line 16)
-(KEYWORD, int, line 16)
-(VARIABLE, i, line 16)
-(OPERATOR, =, line 16)
-(NUMBER, 0, line 16)
-(DELIMITER, ;, line 16)
-(VARIABLE, i, line 16)
-(OPERATOR, <, line 16)
-(VARIABLE, n, line 16)
-(DELIMITER, ;, line 16)
-(VARIABLE, i, line 16)
-(OPERATOR, +, line 16)
-(OPERATOR, +, line 16)
-(DELIMITER, ), line 16)
-(DELIMITER, {, line 16)
-(VARIABLE, localVar, line 17)
-(OPERATOR, +, line 17)
-(OPERATOR, =, line 17)
-(VARIABLE, i, line 17)
-(DELIMITER, ;, line 17)
-(KEYWORD, if, line 19)
-(DELIMITER, (, line 19)
-(VARIABLE, localVar, line 19)
-(OPERATOR, >, line 19)
-(NUMBER, 50, line 19)
-(DELIMITER, ), line 19)
-(DELIMITER, {, line 19)
-(VARIABLE, break, line 20)
-(DELIMITER, ;, line 20)
-(DELIMITER, }, line 21)
-(DELIMITER, }, line 22)
-(DELIMITER, }, line 23)
-(KEYWORD, int, line 26)
-(VARIABLE, recursiveFunction, line 26)
-(DELIMITER, (, line 26)
-(KEYWORD, int, line 26)
-(VARIABLE, n, line 26)
-(DELIMITER, ), line 26)
-(DELIMITER, {, line 26)
-(KEYWORD, if, line 27)
-(DELIMITER, (, line 27)
-(VARIABLE, n, line 27)
-(OPERATOR, <, line 27)
-(OPERATOR, =, line 27)
-(NUMBER, 1, line 27)
-(DELIMITER, ), line 27)
-(DELIMITER, {, line 27)
-(KEYWORD, return, line 28)
-(VARIABLE, n, line 28)
-(DELIMITER, ;, line 28)
-(DELIMITER, }, line 29)
-(KEYWORD, return, line 30)
-(VARIABLE, n, line 30)
-(OPERATOR, +, line 30)
-(VARIABLE, recursiveFunction, line 30)
-(DELIMITER, (, line 30)
-(VARIABLE, n, line 30)
-(OPERATOR, -, line 30)
-(NUMBER, 1, line 30)
-(DELIMITER, ), line 30)
-(DELIMITER, ;, line 30)
-(DELIMITER, }, line 31)
-(KEYWORD, int, line 33)
-(VARIABLE, main, line 33)
-(DELIMITER, (, line 33)
-(DELIMITER, ), line 33)
-(DELIMITER, {, line 33)
-(KEYWORD, int, line 34)
-(VARIABLE, x, line 34)
-(OPERATOR, =, line 34)
-(NUMBER, 5, line 34)
-(DELIMITER, ;, line 34)
-(NAMESPACE, std, line 35)
-(KEYWORD, string, line 35)
-(VARIABLE, s, line 35)
-(OPERATOR, =, line 35)
-(STRING, "123", line 35)
-(DELIMITER, ;, line 35)
-(KEYWORD, float, line 36)
-(VARIABLE, y, line 36)
-(OPERATOR, =, line 36)
-(NUMBER, 1.234, line 36)
-(DELIMITER, ;, line 36)
-(KEYWORD, for, line 38)
-(DELIMITER, (, line 38)
-(KEYWORD, int, line 38)
-(VARIABLE, i, line 38)
-(OPERATOR, =, line 38)
-(NUMBER, 0, line 38)
-(DELIMITER, ;, line 38)
-(VARIABLE, i, line 38)
-(OPERATOR, <, line 38)
-(NUMBER, 10, line 38)
-(DELIMITER, ;, line 38)
-(VARIABLE, i, line 38)
-(OPERATOR, +, line 38)
-(OPERATOR, +, line 38)
-(DELIMITER, ), line 38)
-(DELIMITER, {, line 38)
-(VARIABLE, x, line 39)
-(OPERATOR, +, line 39)
-(OPERATOR, =, line 39)
-(VARIABLE, i, line 39)
-(DELIMITER, ;, line 39)
-(KEYWORD, if, line 40)
-(DELIMITER, (, line 40)
-(VARIABLE, x, line 40)
-(OPERATOR, >, line 40)
-(NUMBER, 50, line 40)
-(DELIMITER, ), line 40)
-(DELIMITER, {, line 40)
-(VARIABLE, break, line 42)
-(DELIMITER, ;, line 42)
-(DELIMITER, }, line 43)
-(DELIMITER, }, line 44)
-(NAMESPACE, std, line 46)
-(STREAM, cout, line 46)
-(OPERATOR, <, line 46)
-(OPERATOR, <, line 46)
-(STRING, "Program completat.", line 46)
-(OPERATOR, <, line 46)
-(OPERATOR, <, line 46)
-(NAMESPACE, std, line 46)
-(STREAM, endl, line 46)
-(DELIMITER, ;, line 46)
-(KEYWORD, return, line 47)
-(NUMBER, 0, line 47)
-(DELIMITER, ;, line 47)
-(DELIMITER, }, line 48)
+int globalVar = 10;
+std::string globalStr = "Hello";
+float pi = 3.14;
+
+
+int globalVar = 20;
+
+
+void iterativeFunction(int n) {
+    int localVar = 5; 
+    std::string localStr = "Iterative Function"; 
+    
+    
+    int localVar = 10;
+
+    for (int i = 0; i < n; i++) {
+        localVar += i; 
+        if (localVar > 50) {
+            break;
+        }
+    }
+}
+
+
+int recursiveFunction(int n) {
+    
+    float invalidFloat = "invalid";
+
+    if (n <= 1) {
+        return n;
+    }
+    return n + recursiveFunction(n - 1);
+}
+
+
+void parameterFunction(int a, int b, int a) {
+    int x = 10; 
+    int x = 20; 
+}
+
+
+int incompleteFunction(int a, int b) {
+    int y = 5;
+}
+
+
+int main() {
+    int x = 5; 
+    std::string str = 123; 
+    int x = 10; 
+
+    for (int i = 0; i < 10; i++) {
+        x += i; 
+    }
+
+    std::cout << "Program completat." << std::endl;
+    return 0;
+}

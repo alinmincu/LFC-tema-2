@@ -1,3 +1,6 @@
-Error: Invalid initialization for variable globalStr with value 20.
-Error: Variable pi is already declared.
-Error: Variable i is already declared.
+Error: Global variable 'globalVar' is already declared.
+Error: Variable 'localVar' is already declared locally in function 'iterativeFunction'.
+Error: Invalid initialization for local variable 'invalidFloat' in function 'recursiveFunction' with value '"invalid"'.
+Error: Variable 'x' is already declared locally in function 'parameterFunction'.
+Error: Invalid initialization for local variable 'str' in function 'main' with value '123'.
+Error: Variable 'x' is already declared locally in function 'main'.
