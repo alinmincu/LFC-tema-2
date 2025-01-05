@@ -73,7 +73,6 @@ std::string getTokenType(const std::string& token, const std::string& nextToken 
     if (std::regex_match(token, std::regex(R"(\d+\.\d+|\d+)"))) return "NUMBER";
     if (std::regex_match(token, std::regex(R"(".*?")"))) return "STRING";
 
-    // Check if the token is a function name (look ahead for '(')
     if (!nextToken.empty() && nextToken == "(") {
         return "FUNCTION_NAME";
     }
@@ -141,7 +140,7 @@ void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& glob
     }
 }
 
-void analyzeFunctions(const std::string& code, std::vector<Function>& functions, std::ofstream& outputFile) {
+void analyzeFunctions(const std::string& code, std::vector<Function>& functions, std::ofstream& outputFile, std::ofstream& errorsFile) {
     std::regex functionRegex(R"((int|float|string|void)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{)");
     std::regex localVarRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^;]+);)");
     std::regex controlStructureRegex(R"((if|else if|else|for|while))");
@@ -164,13 +163,25 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
 
             // Extract function parameters
             std::string params = match[3];
-            std::istringstream paramStream(params);
-            std::string param;
-            while (std::getline(paramStream, param, ',')) {
-                std::regex paramRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*))");
-                std::smatch paramMatch;
-                if (std::regex_match(param, paramMatch, paramRegex)) {
-                    func.parameters.push_back({ paramMatch[1], paramMatch[2], "", func.line });
+            // Extract function parameters
+            std::regex paramRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*))");
+            std::smatch paramMatch;
+            std::string::const_iterator searchStart(params.cbegin());
+
+            while (std::regex_search(searchStart, params.cend(), paramMatch, paramRegex)) {
+                func.parameters.push_back({ paramMatch[1], paramMatch[2], "", func.line });
+                searchStart = paramMatch.suffix().first; // Avansează după parametrul curent
+            }
+
+            // Verificare pentru parametrii duplicat
+            std::unordered_set<std::string> parameterNames;
+            for (const auto& param : func.parameters) {
+                if (parameterNames.find(param.name) != parameterNames.end()) {
+                    errorsFile << "Error: Parameter '" << param.name
+                        << "' is already declared in function '" << func.name << "'.\n";
+                }
+                else {
+                    parameterNames.insert(param.name);
                 }
             }
 
@@ -192,11 +203,20 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
                 functionBody += line + "\n";
             }
 
+            // Verificare dacă corpul funcției este complet (acolade echilibrate)
             if (braceCount != 0) {
-                outputFile << "Error: Incomplete function body for " << func.name << "\n";
-                currentCode.clear(); // Reset to avoid redundant errors
+                errorsFile << "Error: Incomplete function body for '" << func.name << "'.\n";
+                std::cerr << "Debug: Incomplete function detected - " << func.name << "\n";
+                currentCode.clear();
                 continue;
             }
+
+            // Verificare pentru funcțiile non-void fără return
+            if (func.returnType != "void" && functionBody.find("return") == std::string::npos) {
+                errorsFile << "Error: Non-void function '" << func.name
+                    << "' does not have a return statement.\n";
+            }
+
 
             // Detect local variables
             std::smatch localVarMatch;
@@ -329,7 +349,7 @@ int main() {
     }
 
     // Analyze functions
-    analyzeFunctions(cleanedCode, functions, functionsFile);
+    analyzeFunctions(cleanedCode, functions, functionsFile, errorsFile);
 
     // Check for duplicate local variables within functions
     for (const auto& func : functions) {

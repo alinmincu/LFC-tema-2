@@ -14,12 +14,12 @@ Local Variables:
 Control Structures:
 - if, line 33
 
-void parameterFunction(int a) is neither iterative nor recursive
+void parameterFunction(int a, int b, int a) is neither iterative nor recursive
 Local Variables:
 - int x = 10
 - int x = 20
 
-int incompleteFunction(int a) is neither iterative nor recursive
+int incompleteFunction(int a, int b) is neither iterative nor recursive
 Local Variables:
 - int y = 5
 
