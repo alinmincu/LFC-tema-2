@@ -1,62 +1,36 @@
-﻿#include <iostream>
-#include <string>
-
-// Declarație globală validă
-int globalVar = 10;
-std::string globalStr = "Hello";
-float pi = 3.14;
-
-// Declarație globală duplicată
-int globalVar = 20;
-
-// Funcție iterativă cu variabile locale valide și eronate
-void iterativeFunction(int n) {
-    int localVar = 5; // Locală validă
-    std::string localStr = "Iterative Function"; // Locală validă
-    
-    // Variabilă locală duplicată
-    int localVar = 10;
-
-    for (int i = 0; i < n; i++) {
-        localVar += i; // Reutilizare variabilă locală
-        if (localVar > 50) {
-            break;
-        }
-    }
+﻿int addIntegers(int first, int second)
+{
+ return first + second;
 }
-
-// Funcție recursivă cu variabile locale eronate
-int recursiveFunction(int n) {
-    // Variabilă cu inițializare invalidă
-    float invalidFloat = "invalid";
-
-    if (n <= 1) {
-        return n;
-    }
-    return n + recursiveFunction(n - 1);
+float divideIntegers(int first, int second)
+{
+ if (second == 0)
+ {
+ return 0; //We don’t want to handle exceptions, so we’ll return 0 for simplicity
+ }
+ return first / second;
 }
-
-// Funcție cu parametri duplicat
-void parameterFunction(int a, int b, int a) {
-    int x = 10; // Locală validă
-    int x = 20; // Locală duplicată
-}
-
-// Funcție fără implementare completă
-int incompleteFunction(int a, int b) {
-    int y = 5;
-}
-
-// Main-ul programului
-int main() {
-    int x = 5; // Locală validă
-    std::string str = 123; // Inițializare invalidă
-    int x = 10; // Duplicată locală
-
-    for (int i = 0; i < 10; i++) {
-        x += i; 
-    }
-
-    std::cout << "Program completat." << std::endl;
-    return 0;
-}
+double globalVariable = 15.67; //Using global variables is bad practice
+int main()
+{
+ int myFirstVariable = 17;
+ int mySecondVariable = 45;
+ int myThirdVariable = 3;
+ for (int i = 0; i < myThirdVariable; ++i)
+ {
+ myFirstVariable += i;
+ }
+ string myString = "";
+ if (myFirstVariable >= mySecondVariable && globalVariable != 16.54)
+ {
+ myString = "Both conditions are true";
+ }
+ else
+ {
+ myString = "At least one of the conditions is false";
+ int temp = myFirstVariable + 5;
+ }
+ myThirdVariable = addIntegers(myFirstVariable, mySecondVariable);
+ float myFloat = divideIntegers(myThirdVariable, myFirstVariable);
+ return 0;
+} 

@@ -5,8 +5,10 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
+#include <unordered_map>
 
 int code = 10;
+std::unordered_map<std::string, std::string> functionReturnTypes;
 
 struct Variable {
     std::string type;
@@ -37,13 +39,42 @@ std::string removeInvalidDeclarations(const std::string& code, const std::unorde
 }
 
 bool isInitializationValid(const std::string& type, const std::string& value) {
+    // Regex for detecting numeric values
+    std::regex intRegex("^[-+]?\\d+$");                // Integer numbers
+    std::regex floatRegex("^[-+]?\\d*\\.\\d+$");       // Floating-point numbers
+    std::regex variableRegex(R"([a-zA-Z_][a-zA-Z0-9_]*)"); // Variable names
+    std::regex expressionRegex(
+        R"([a-zA-Z_][a-zA-Z0-9_]*(\s*[\+\-\*/]\s*[a-zA-Z_][a-zA-Z0-9_]*|\s*[\+\-\*/]\s*\d+(\.\d+)?)*|(\b[a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\)))");
+    std::regex functionCallRegex(R"([a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\))");
+
+    if (std::regex_match(value, functionCallRegex)) {
+        // Verificăm tipul returnat al funcției
+        std::string functionName = value.substr(0, value.find('(')); // Extragem numele funcției
+        if (functionReturnTypes.find(functionName) != functionReturnTypes.end()) {
+            std::string returnType = functionReturnTypes[functionName];
+            if (type == "int" && (returnType == "float" || returnType == "double")) {
+                return false; // Nu permit conversii implicite de la float/double la int
+            }
+            // Alte verificări pot fi adăugate aici dacă este necesar
+            return true; // Tipurile sunt compatibile
+        }
+    }
+    if (type == "int") {
+        // Integer initialization: must be an integer or an integer-compatible expression
+        if (std::regex_match(value, floatRegex)) {
+            return false; // Floats are not valid for int
+        }
+        return std::regex_match(value, intRegex) || std::regex_match(value, expressionRegex);
+    }
+    if (type == "float" || type == "double") {
+        // Floating-point initialization: float, integer, or valid expression
+        return std::regex_match(value, floatRegex) || std::regex_match(value, intRegex) || std::regex_match(value, expressionRegex);
+    }
     if (type == "string") {
+        // Strings must be enclosed in double quotes
         return value.front() == '"' && value.back() == '"';
     }
-    if (type == "int" || type == "float") {
-        return std::regex_match(value, std::regex("^[-+]?\\d*\\.?\\d+$"));
-    }
-    return false;
+    return false; // Unsupported types return false by default
 }
 
 std::string removeComments(const std::string& code) {
@@ -114,28 +145,35 @@ void analyzeTokens(const std::string& code, std::ofstream& outputFile) {
 }
 
 void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& globalVariables, std::ofstream& outputFile) {
-    std::regex globalVarRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^;]+);)");
+    // Regex for global variable detection (int, float, double, string)
+    std::regex globalVarRegex(R"((int|float|double|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*([^;]+))?;)");
     std::smatch match;
     std::istringstream stream(code);
     std::string line;
-    bool insideFunction = false;
+
+    int braceBalance = 0; // To track if we are inside a function or not
 
     while (std::getline(stream, line)) {
-        if (std::regex_search(line, std::regex(R"((int|float|string|void)\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\()"))) {
-            insideFunction = true;
-        }
-        if (line.find("}") != std::string::npos) {
-            insideFunction = false;
-        }
+        // Adjust brace balance
+        braceBalance += std::count(line.begin(), line.end(), '{') - std::count(line.begin(), line.end(), '}');
 
-        if (!insideFunction && std::regex_search(line, match, globalVarRegex)) {
-            globalVariables.push_back({ match[1], match[2], match[3], 0 });
+        // If we are outside of any function (braceBalance == 0), check for global variables
+        if (braceBalance == 0 && std::regex_search(line, match, globalVarRegex)) {
+            std::string type = match[1];
+            std::string name = match[2];
+            std::string value = match[4]; // Value is in group 4, if present
+            globalVariables.push_back({ type, name, value, 0 });
         }
     }
 
+    // Output global variables to the file
     outputFile << "Global Variables:\n";
     for (const auto& var : globalVariables) {
-        outputFile << var.type << " " << var.name << " = " << var.value << "\n";
+        outputFile << var.type << " " << var.name;
+        if (!var.value.empty()) {
+            outputFile << " = " << var.value;
+        }
+        outputFile << "\n";
     }
 }
 
@@ -159,6 +197,8 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
             func.name = match[2];
             func.line = lineCounter;
 
+            functionReturnTypes[func.name] = func.returnType;
+            
             std::string params = match[3];
             std::regex paramRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*))");
             std::smatch paramMatch;

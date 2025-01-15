@@ -1,8 +1,0 @@
-Error: Global variable 'globalVar' is already declared.
-Error: Parameter 'a' is already declared in function 'parameterFunction'.
-Error: Non-void function 'incompleteFunction' does not have a return statement.
-Error: Variable 'localVar' is already declared locally in function 'iterativeFunction'.
-Error: Invalid initialization for local variable 'invalidFloat' in function 'recursiveFunction' with value '"invalid"'.
-Error: Variable 'x' is already declared locally in function 'parameterFunction'.
-Error: Invalid initialization for local variable 'str' in function 'main' with value '123'.
-Error: Variable 'x' is already declared locally in function 'main'.

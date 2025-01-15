@@ -1,63 +1,37 @@
 Cleaned Code:
-﻿#include <iostream>
-#include <string>
-
-
-int globalVar = 10;
-std::string globalStr = "Hello";
-float pi = 3.14;
-
-
-int globalVar = 20;
-
-
-void iterativeFunction(int n) {
-    int localVar = 5; 
-    std::string localStr = "Iterative Function"; 
-    
-    
-    int localVar = 10;
-
-    for (int i = 0; i < n; i++) {
-        localVar += i; 
-        if (localVar > 50) {
-            break;
-        }
-    }
+﻿int addIntegers(int first, int second)
+{
+ return first + second;
 }
-
-
-int recursiveFunction(int n) {
-    
-    float invalidFloat = "invalid";
-
-    if (n <= 1) {
-        return n;
-    }
-    return n + recursiveFunction(n - 1);
+float divideIntegers(int first, int second)
+{
+ if (second == 0)
+ {
+ return 0; 
+ }
+ return first / second;
 }
-
-
-void parameterFunction(int a, int b, int a) {
-    int x = 10; 
-    int x = 20; 
-}
-
-
-int incompleteFunction(int a, int b) {
-    int y = 5;
-}
-
-
-int main() {
-    int x = 5; 
-    std::string str = 123; 
-    int x = 10; 
-
-    for (int i = 0; i < 10; i++) {
-        x += i; 
-    }
-
-    std::cout << "Program completat." << std::endl;
-    return 0;
-}
+double globalVariable = 15.67; 
+int main()
+{
+ int myFirstVariable = 17;
+ int mySecondVariable = 45;
+ int myThirdVariable = 3;
+ for (int i = 0; i < myThirdVariable; ++i)
+ {
+ myFirstVariable += i;
+ }
+ string myString = "";
+ if (myFirstVariable >= mySecondVariable && globalVariable != 16.54)
+ {
+ myString = "Both conditions are true";
+ }
+ else
+ {
+ myString = "At least one of the conditions is false";
+ int temp = myFirstVariable + 5;
+ }
+ myThirdVariable = addIntegers(myFirstVariable, mySecondVariable);
+ float myFloat = divideIntegers(myThirdVariable, myFirstVariable);
+ return 0;
+} 

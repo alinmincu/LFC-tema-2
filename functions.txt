@@ -1,34 +1,20 @@
-void iterativeFunction(int n) is iterative
-Local Variables:
-- int localVar = 5
-- string localStr = "Iterative Function"
-- int localVar = 10
-- int i = 0
+int addIntegers(int first, int second) is neither iterative nor recursive
+
+float divideIntegers(int first, int second) is neither iterative nor recursive
 Control Structures:
-- for, line 20
-- if, line 22
-
-int recursiveFunction(int n) is recursive
-Local Variables:
-- float invalidFloat = "invalid"
-Control Structures:
-- if, line 33
-
-void parameterFunction(int a, int b, int a) is neither iterative nor recursive
-Local Variables:
-- int x = 10
-- int x = 20
-
-int incompleteFunction(int a, int b) is neither iterative nor recursive
-Local Variables:
-- int y = 5
+- if, line 7
 
 int main() is the main function
 Local Variables:
-- int x = 5
-- string str = 123
-- int x = 10
+- int myFirstVariable = 17
+- int mySecondVariable = 45
+- int myThirdVariable = 3
 - int i = 0
+- string myString = ""
+- int temp = myFirstVariable + 5
+- float myFloat = divideIntegers(myThirdVariable, myFirstVariable)
 Control Structures:
-- for, line 56
+- for, line 19
+- if, line 24
+- else, line 28
 

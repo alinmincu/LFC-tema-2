@@ -1,5 +1,2 @@
 Global Variables:
-int globalVar = 10
-string globalStr = "Hello"
-float pi = 3.14
-int globalVar = 20
+double globalVariable = 15.67
