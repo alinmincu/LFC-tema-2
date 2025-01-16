@@ -1,0 +1,1 @@
+Error: Return type mismatch in function 'addIntegers'. Expected 'int', but got 'unknown' for expression 'first + a'.
