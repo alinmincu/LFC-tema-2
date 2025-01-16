@@ -5,10 +5,8 @@
 #include <iostream>
 #include <sstream>
 #include <vector>
-#include <unordered_map>
 
 int code = 10;
-std::unordered_map<std::string, std::string> functionReturnTypes;
 
 struct Variable {
     std::string type;
@@ -39,83 +37,13 @@ std::string removeInvalidDeclarations(const std::string& code, const std::unorde
 }
 
 bool isInitializationValid(const std::string& type, const std::string& value) {
-    std::regex intRegex("^[-+]?\\d+$");
-    std::regex floatRegex("^[-+]?\\d*\\.\\d+$");
-    std::regex variableRegex(R"([a-zA-Z_][a-zA-Z0-9_]*)"); 
-    std::regex expressionRegex(
-        R"([a-zA-Z_][a-zA-Z0-9_]*(\s*[\+\-\*/]\s*[a-zA-Z_][a-zA-Z0-9_]*|\s*[\+\-\*/]\s*\d+(\.\d+)?)*|(\b[a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\)))");
-    std::regex functionCallRegex(R"([a-zA-Z_][a-zA-Z0-9_]*\s*\(.*\))");
-
-    if (std::regex_match(value, functionCallRegex)) {
-        std::string functionName = value.substr(0, value.find('(')); // Extragem numele funcției
-        if (functionReturnTypes.find(functionName) != functionReturnTypes.end()) {
-            std::string returnType = functionReturnTypes[functionName];
-            if (type == "int" && (returnType == "float" || returnType == "double")) {
-                return false; 
-            }
-            return true; 
-        }
-    }
-    if (type == "int") {
-        if (std::regex_match(value, floatRegex)) {
-            return false; 
-        }
-        return std::regex_match(value, intRegex) || std::regex_match(value, expressionRegex);
-    }
-    if (type == "float" || type == "double") {
-        return std::regex_match(value, floatRegex) || std::regex_match(value, intRegex) || std::regex_match(value, expressionRegex);
-    }
     if (type == "string") {
         return value.front() == '"' && value.back() == '"';
     }
-    return false; 
-}
-
-bool areTypesCompatible(const std::string& type1, const std::string& type2) {
-    std::unordered_set<std::string> numericTypes = { "int", "float", "double" };
-
-    if (numericTypes.find(type1) != numericTypes.end() && numericTypes.find(type2) != numericTypes.end()) {
-        return true;
+    if (type == "int" || type == "float") {
+        return std::regex_match(value, std::regex("^[-+]?\\d*\\.?\\d+$"));
     }
-    return type1 == type2;
-}
-
-std::string getExpressionType(const std::string& expression, const Function& func) {
-    std::regex variableRegex(R"([a-zA-Z_][a-zA-Z0-9_]*)");
-    std::regex numberRegex(R"(\d+)");
-    std::regex floatNumberRegex(R"(\d+\.\d+)");
-    std::regex stringRegex(R"(".*?")");
-    std::regex operationRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*|\d+(\.\d+)?)\s*[\+\-\*/]\s*([a-zA-Z_][a-zA-Z0-9_]*|\d+(\.\d+)?))");
-
-    if (std::regex_match(expression, stringRegex)) return "string";
-    if (std::regex_match(expression, floatNumberRegex)) return "float";
-    if (std::regex_match(expression, numberRegex)) return "int";
-
-    if (std::regex_match(expression, operationRegex)) {
-        std::smatch operationMatch;
-        std::regex_search(expression, operationMatch, operationRegex);
-
-        std::string operand1 = operationMatch[1];
-        std::string operand2 = operationMatch[3];
-
-        std::string type1 = getExpressionType(operand1, func);
-        std::string type2 = getExpressionType(operand2, func);
-
-        if (!areTypesCompatible(type1, type2)) return "unknown";
-
-        if (type1 == "float" || type2 == "float") return "float";
-        if (type1 == "double" || type2 == "double") return "double";
-        return "int";
-    }
-
-    for (const auto& param : func.parameters) {
-        if (param.name == expression) return param.type;
-    }
-    for (const auto& localVar : func.localVariables) {
-        if (localVar.name == expression) return localVar.type;
-    }
-
-    return "unknown";
+    return false;
 }
 
 std::string removeComments(const std::string& code) {
@@ -186,39 +114,35 @@ void analyzeTokens(const std::string& code, std::ofstream& outputFile) {
 }
 
 void analyzeGlobalVariables(const std::string& code, std::vector<Variable>& globalVariables, std::ofstream& outputFile) {
-    std::regex globalVarRegex(R"((int|float|double|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)(\s*=\s*([^;]+))?;)");
+    std::regex globalVarRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^;]+);)");
     std::smatch match;
     std::istringstream stream(code);
     std::string line;
-
-    int braceBalance = 0; 
+    bool insideFunction = false;
 
     while (std::getline(stream, line)) {
-        braceBalance += std::count(line.begin(), line.end(), '{') - std::count(line.begin(), line.end(), '}');
+        if (std::regex_search(line, std::regex(R"((int|float|string|void)\s+[a-zA-Z_][a-zA-Z0-9_]*\s*\()"))) {
+            insideFunction = true;
+        }
+        if (line.find("}") != std::string::npos) {
+            insideFunction = false;
+        }
 
-        if (braceBalance == 0 && std::regex_search(line, match, globalVarRegex)) {
-            std::string type = match[1];
-            std::string name = match[2];
-            std::string value = match[4];
-            globalVariables.push_back({ type, name, value, 0 });
+        if (!insideFunction && std::regex_search(line, match, globalVarRegex)) {
+            globalVariables.push_back({ match[1], match[2], match[3], 0 });
         }
     }
 
     outputFile << "Global Variables:\n";
     for (const auto& var : globalVariables) {
-        outputFile << var.type << " " << var.name;
-        if (!var.value.empty()) {
-            outputFile << " = " << var.value;
-        }
-        outputFile << "\n";
+        outputFile << var.type << " " << var.name << " = " << var.value << "\n";
     }
 }
 
 void analyzeFunctions(const std::string& code, std::vector<Function>& functions, std::ofstream& outputFile, std::ofstream& errorsFile) {
     std::regex functionRegex(R"((int|float|string|void)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*\(([^)]*)\)\s*\{)");
     std::regex localVarRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*([^;]+);)");
-    std::regex operationRegex(R"(([a-zA-Z_][a-zA-Z0-9_]*)\s*[\+\-\*/]\s*([a-zA-Z_][a-zA-Z0-9_]*))");
-    std::regex returnRegex(R"(\breturn\s+(.*?);)");
+    std::regex controlStructureRegex(R"((if|else if|else|for|while))");
     std::smatch match;
     std::istringstream stream(code);
     std::string line;
@@ -234,8 +158,6 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
             func.returnType = match[1];
             func.name = match[2];
             func.line = lineCounter;
-
-            functionReturnTypes[func.name] = func.returnType;
 
             std::string params = match[3];
             std::regex paramRegex(R"((int|float|string)\s+([a-zA-Z_][a-zA-Z0-9_]*))");
@@ -275,57 +197,80 @@ void analyzeFunctions(const std::string& code, std::vector<Function>& functions,
 
             if (braceCount != 0) {
                 errorsFile << "Error: Incomplete function body for '" << func.name << "'.\n";
+                std::cerr << "Debug: Incomplete function detected - " << func.name << "\n";
                 currentCode.clear();
                 continue;
             }
 
-            std::smatch operationMatch;
-            std::string::const_iterator operationSearchStart(functionBody.cbegin());
-            while (std::regex_search(operationSearchStart, functionBody.cend(), operationMatch, operationRegex)) {
-                std::string var1 = operationMatch[1];
-                std::string var2 = operationMatch[2];
-
-                std::string type1, type2;
-                for (const auto& param : func.parameters) {
-                    if (param.name == var1) type1 = param.type;
-                    if (param.name == var2) type2 = param.type;
-                }
-                for (const auto& localVar : func.localVariables) {
-                    if (localVar.name == var1) type1 = localVar.type;
-                    if (localVar.name == var2) type2 = localVar.type;
-                }
-
-                if (!type1.empty() && !type2.empty() && !areTypesCompatible(type1, type2)) {
-                    errorsFile << "Error: Incompatible types in operation between '" << var1 << "' (" << type1
-                        << ") and '" << var2 << "' (" << type2 << ") in function '" << func.name << "'.\n";
-                }
-                operationSearchStart = operationMatch.suffix().first;
+            if (func.returnType != "void" && functionBody.find("return") == std::string::npos) {
+                errorsFile << "Error: Non-void function '" << func.name
+                    << "' does not have a return statement.\n";
             }
 
-            if (func.returnType != "void") {
-                std::smatch returnMatch;
-                std::string::const_iterator returnSearchStart(functionBody.cbegin());
-                while (std::regex_search(returnSearchStart, functionBody.cend(), returnMatch, returnRegex)) {
-                    std::string returnExpression = returnMatch[1];
-                    std::string returnType = getExpressionType(returnExpression, func);
 
-                    if ((func.returnType == "float" && returnType == "int") ||
-                        (func.returnType == "double" && (returnType == "int" || returnType == "float"))) {
-                        returnSearchStart = returnMatch.suffix().first;
-                        continue;
-                    }
+            std::smatch localVarMatch;
+            std::string::const_iterator localSearchStart(functionBody.cbegin());
+            while (std::regex_search(localSearchStart, functionBody.cend(), localVarMatch, localVarRegex)) {
+                func.localVariables.push_back({ localVarMatch[1], localVarMatch[2], localVarMatch[3], func.line });
+                localSearchStart = localVarMatch.suffix().first;
+            }
 
-                    if (returnType != func.returnType) {
-                        errorsFile << "Error: Return type mismatch in function '" << func.name << "'. Expected '"
-                            << func.returnType << "', but got '" << returnType << "' for expression '"
-                            << returnExpression << "'.\n";
+            std::smatch controlMatch;
+            std::string::const_iterator controlSearchStart(functionBody.cbegin());
+            std::vector<std::pair<std::string, int>> controlStructures;
+            while (std::regex_search(controlSearchStart, functionBody.cend(), controlMatch, controlStructureRegex)) {
+                int structureLine = func.line;
+                for (auto it = functionBody.cbegin(); it != controlMatch[0].first; ++it) {
+                    if (*it == '\n') {
+                        structureLine++;
                     }
-                    returnSearchStart = returnMatch.suffix().first;
+                }
+                controlStructures.emplace_back(controlMatch.str(), structureLine);
+                controlSearchStart = controlMatch.suffix().first;
+            }
+
+            std::regex recursiveCallRegex("\\b" + func.name + "\\s*\\(");
+            bool isRecursive = std::regex_search(functionBody, recursiveCallRegex);
+            bool isIterative = functionBody.find("for") != std::string::npos || functionBody.find("while") != std::string::npos;
+
+            outputFile << func.returnType << " " << func.name << "(";
+            for (size_t i = 0; i < func.parameters.size(); ++i) {
+                outputFile << func.parameters[i].type << " " << func.parameters[i].name;
+                if (i < func.parameters.size() - 1) outputFile << ", ";
+            }
+            outputFile << ") is ";
+            if (func.name == "main") {
+                outputFile << "the main function";
+            }
+            else if (isRecursive) {
+                outputFile << "recursive";
+            }
+            else if (isIterative) {
+                outputFile << "iterative";
+            }
+            else {
+                outputFile << "neither iterative nor recursive";
+            }
+            outputFile << "\n";
+
+            if (!func.localVariables.empty()) {
+                outputFile << "Local Variables:\n";
+                for (const auto& var : func.localVariables) {
+                    outputFile << "- " << var.type << " " << var.name << " = " << var.value << "\n";
+                }
+            }
+
+            if (!controlStructures.empty()) {
+                outputFile << "Control Structures:\n";
+                for (const auto& [control, structureLine] : controlStructures) {
+                    outputFile << "- " << control << ", line " << structureLine << "\n";
                 }
             }
 
             functions.push_back(func);
             currentCode.clear();
+
+            outputFile << "\n";
         }
     }
 }

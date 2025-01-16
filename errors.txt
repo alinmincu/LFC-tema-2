@@ -1,1 +1,4 @@
-Error: Return type mismatch in function 'addIntegers'. Expected 'int', but got 'unknown' for expression 'first + a'.
+Error: Invalid initialization for global variable 'temp' with value 'myFirstVariable + 5'.
+Error: Invalid initialization for global variable 'myFloat' with value 'divideIntegers(myThirdVariable, myFirstVariable)'.
+Error: Invalid initialization for local variable 'temp' in function 'main' with value 'myFirstVariable + 5'.
+Error: Invalid initialization for local variable 'myFloat' in function 'main' with value 'divideIntegers(myThirdVariable, myFirstVariable)'.

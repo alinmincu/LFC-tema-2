@@ -1,2 +1,4 @@
 Global Variables:
-double globalVariable = 15.67
+string myString = ""
+int temp = myFirstVariable + 5
+float myFloat = divideIntegers(myThirdVariable, myFirstVariable)

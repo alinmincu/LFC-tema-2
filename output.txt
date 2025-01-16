@@ -1,8 +1,7 @@
 Cleaned Code:
 ﻿int addIntegers(int first, int second)
 {
-string a = "hello";
- return first + a;
+ return first + second;
 }
 float divideIntegers(int first, int second)
 {
